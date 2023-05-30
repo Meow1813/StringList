@@ -78,7 +78,7 @@ public class IntegerListImpl implements IntegerList {
     public boolean contains(Integer item) {
         checkItem(item);
         Integer[] arr = toArray();
-        sort(arr);
+        sort(arr, 0, size - 1);
         return binarySearch(arr, item);
     }
 
@@ -143,8 +143,12 @@ public class IntegerListImpl implements IntegerList {
 
     private void checkSize() {
         if (size == storage.length) {
-            storage = Arrays.copyOf(storage, (int) (size * 1.5 + 1));
+            grow();
         }
+    }
+
+    private void grow() {
+        storage = Arrays.copyOf(storage, (int) (size * 1.5 + 1));
     }
 
     private void checkIndex(int index) {
@@ -153,17 +157,32 @@ public class IntegerListImpl implements IntegerList {
         }
     }
 
-    private void sort(Integer[] arr) {
-        for (int i = 1; i < arr.length; i++) {
-            int temp = arr[i];
-            int j = i;
-            while (j > 0 && arr[j - 1] >= temp) {
-                arr[j] = arr[j - 1];
-                j--;
-            }
-            arr[j] = temp;
+    private void sort(Integer[] arr, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
 
+            sort(arr, begin, partitionIndex - 1);
+            sort(arr, partitionIndex + 1, end);
         }
+    }
+
+    private int partition(Integer[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = begin - 1;
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+                swapElements(arr, i, j);
+            }
+        }
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+
+    private static void swapElements(Integer[] arr, int left, int right) {
+        Integer tmp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = tmp;
     }
 
     private boolean binarySearch(Integer[] arr, Integer item) {
